@@ -1,0 +1,23 @@
+services:
+  prometheus:
+    image: prom/prometheus:v3.11.2       # Image officielle Prometheus
+    container_name: prometheus           # Nom fixe du conteneur (utilisé comme nom DNS dans le réseau Docker)
+    ports:
+      - "9090:9090"                      # port_hôte:port_conteneur
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro  # Config montée en lecture seule (:ro)
+      - prometheus-data:/prometheus      # Volume persistant pour la base de données TSDB
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'  # Fichier de configuration à utiliser
+      - '--storage.tsdb.path=/prometheus'               # Répertoire de stockage des séries temporelles
+      - '--web.enable-lifecycle'         # Active le rechargement de config à chaud via l'API REST
+    restart: unless-stopped              # Redémarre automatiquement, sauf si arrêté manuellement
+    networks:
+      - monitoring                       # Réseau partagé avec Grafana et les exporters
+
+volumes:
+  prometheus-data:                       # Volume Docker persistant entre les redémarrages
+
+networks:
+  monitoring:
+    driver: bridge                       # Réseau bridge isolé — les conteneurs se voient par leur nom

@@ -1,23 +1,36 @@
 services:
   prometheus:
-    image: prom/prometheus:v3.11.2       # Image officielle Prometheus
-    container_name: prometheus           # Nom fixe du conteneur (utilisé comme nom DNS dans le réseau Docker)
+    image: prom/prometheus:v3.11.2 # Image officielle Prometheus
+    container_name: prometheus # Nom fixe du conteneur (utilisé comme nom DNS dans le réseau Docker)
     ports:
-      - "9090:9090"                      # port_hôte:port_conteneur
+      - "9090:9090" # port_hôte:port_conteneur
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro  # Config montée en lecture seule (:ro)
-      - prometheus-data:/prometheus      # Volume persistant pour la base de données TSDB
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro # Config montée en lecture seule (:ro)
+      - prometheus-data:/prometheus # Volume persistant pour la base de données TSDB
+      - ./rules:/etc/prometheus/rules:ro # Monte le dossier local 'rules' dans le conteneur pour les règles d'alerte
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'  # Fichier de configuration à utiliser
-      - '--storage.tsdb.path=/prometheus'               # Répertoire de stockage des séries temporelles
-      - '--web.enable-lifecycle'         # Active le rechargement de config à chaud via l'API REST
-    restart: unless-stopped              # Redémarre automatiquement, sauf si arrêté manuellement
+      - '--config.file=/etc/prometheus/prometheus.yml' # Fichier de configuration à utiliser
+      - '--storage.tsdb.path=/prometheus' # Répertoire de stockage des séries temporelles
+      - '--web.enable-lifecycle' # Active le rechargement de config à chaud via l'API REST
+    restart: unless-stopped # Redémarre automatiquement, sauf si arrêté manuellement
     networks:
-      - monitoring                       # Réseau partagé avec Grafana et les exporters
-
+      - monitoring # Réseau partagé avec Grafana et les exporters
+  alertmanager:
+    image: prom/alertmanager:v0.32.0
+    container_name: alertmanager
+    ports:
+      - "9093:9093" # Interface web et API d'Alertmanager
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro # Config montée en lecture seule
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    restart: unless-stopped
+    networks:
+      - monitoring
 volumes:
-  prometheus-data:                       # Volume Docker persistant entre les redémarrages
+  prometheus-data:
+    # Volume Docker persistant entre les redémarrages
 
 networks:
   monitoring:
-    driver: bridge                       # Réseau bridge isolé — les conteneurs se voient par leur nom
+    driver: bridge # Réseau bridge isolé — les conteneurs se voient par leur nom

@@ -268,7 +268,7 @@ Affiche les séries où le **nombre total de requêtes HTTP est supérieur à 10
 
 **Réponse :**
 
-    (votre requête ici)
+    (http_requests_total > 10)
 
 
 ### Question 6 — Requête avec opérateurs logiques

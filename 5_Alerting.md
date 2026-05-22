@@ -164,20 +164,26 @@ Créer des règles d'alertes qui détectent :
 
 **Réponse :**
 
-    (votre configuration ici)
+    (- alert: CPUHigh
+  expr: 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 80
+  for: 1m)
 
    
  - Mémoire élevée
 
 **Réponse :**
 
-    (votre configuration ici)
+    (- alert: MemoryHigh
+  expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 < 15
+  for: 1m)
 
  - Disk usage élevé
 
 **Réponse :**
 
-    (votre configuration ici)
+    (- alert: DiskHigh
+  expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 15
+  for: 2m)
 
 
 
